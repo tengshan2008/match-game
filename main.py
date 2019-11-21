@@ -12,14 +12,18 @@ class Puzzle(object):
         self.width = width
         self.color = color
         self.puzzle = self.__random_init()
+        self.matched_history = []
+        self.puzzle_history = [self.puzzle]
 
 
     def move(self, point_x, point_y, arrow):
         matched = self.__match_puzzle(point_x, point_y, arrow)
         while True:
-            for x, y in matched:
-                self.puzzle[x][y] = 8
-            show_image(self.puzzle)
+            # for x, y in matched:
+            #     self.puzzle[x][y] = 8
+            # show_image(self.puzzle)
+            self.matched_history.append(matched)
+            self.puzzle_history.append(self.puzzle)
             changed = self.__update_puzzle(matched)
             if not self.__is_not_dead():
                 print('dead')
@@ -34,8 +38,8 @@ class Puzzle(object):
 
     def __random_init(self):
         puzzle = [[0 for point_x in range(self.length)] for point_y in range(self.width)]
-        for point_x in range(self.length):
-            for point_y in range(self.width):
+        for point_x in range(self.width):
+            for point_y in range(self.length):
                 puzzle = self.__fill_block(puzzle, point_x, point_y)
         return puzzle
 
@@ -82,43 +86,50 @@ class Puzzle(object):
         return matched
 
 
-    # todo: can't right update
+    # todo: could be better. too many loop
     def __update_puzzle(self, matched):
         changed = list()
-        for x, y in matched:
-            for i in range(x, 0, -1):
-                changed += [(i, y), (i-1, y)]
-                self.puzzle[i][y], self.puzzle[i-1][y] = self.puzzle[i-1][y], self.puzzle[i][y]
-            self.puzzle[0][y] = random.choice(range(self.color))
-            changed.append((0, y))
+        for row in range(self.width):
+            for x, y in matched:
+                if row == x:
+                    for i in range(x, 0, -1):
+                        changed += [(i, y), (i-1, y)]
+                        self.puzzle[i][y], self.puzzle[i-1][y] = self.puzzle[i-1][y], self.puzzle[i][y]
+                    self.puzzle[0][y] = random.choice(range(self.color))
+                    changed.append((0, y))
         return list(set(changed))
 
 
     def __transfor(self):
         self.puzzle_transfor = list(map(list,zip(*self.puzzle)))
 
-    # miss 4 method
+    def __mirror(self):
+        self.puzzle_mirror = [row[::-1] for row in self.puzzle]
+
+
     def __is_not_dead(self):
+        self.__transfor()
+        self.__mirror()
+
         # status like [口口]
         if self.__block_status_1(self.puzzle):
+            return True
+        if self.__block_status_1(self.puzzle_mirror):
+            return True
+        if self.__block_status_1(self.puzzle_transfor):
             return True
         # status like [口X口]
         if self.__block_status_2(self.puzzle):
             return True
-
-        self.__transfor()
-
-        # status like [口口]
-        if self.__block_status_1(self.puzzle_transfor):
-            return True
-        # status like [口X口]
         if self.__block_status_2(self.puzzle_transfor):
             return True
+
         return False
 
+
     def __block_status_1(self, puzzle):
-        for point_x in range(self.length):
-            for point_y in range(self.width-1):
+        for point_x in range(self.width):
+            for point_y in range(self.length-1):
                 if puzzle[point_x][point_y] == puzzle[point_x][point_y+1]:
                     if point_x >= 1 and point_y >= 1 and puzzle[point_x-1][point_y-1] == puzzle[point_y][point_y]:
                         return True
@@ -126,17 +137,12 @@ class Puzzle(object):
                         return True
                     if point_x+1 < self.length and point_y <= 1 and puzzle[point_x+1][point_y-1] == puzzle[point_x][point_y]:
                         return True
-                    if point_x >= 1 and point_y+2 < self.width and puzzle[point_x-1][point_y+2] == puzzle[point_x][point_y]:
-                        return True
-                    if point_y+3 < self.width and puzzle[point_x][point_y+3] == puzzle[point_x][point_y]:
-                        return True
-                    if point_x+1 < self.length and point_y+3 < self.width and puzzle[point_x+1][point_y+3] == puzzle[point_x][point_y]:
-                        return True
         return False
 
+
     def __block_status_2(self, puzzle):
-        for point_x in range(self.length):
-            for point_y in range(1, self.width-1):
+        for point_x in range(self.width):
+            for point_y in range(1, self.length-1):
                 if puzzle[point_x][point_y-1] == puzzle[point_x][point_y+1]:
                     if point_x >= 1 and puzzle[point_x-1][point_y] == puzzle[point_x][point_y-1]:
                         return True
@@ -163,5 +169,6 @@ if __name__ == "__main__":
     p.move(int(x), int(y), arrow)
     show_image(p.puzzle)
 
-
+    print(p.matched_history)
+    print(p.puzzle_history)
 
