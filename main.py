@@ -16,12 +16,15 @@ class Puzzle(object):
 
     def move(self, point_x, point_y, arrow):
         matched = self.__match_puzzle(point_x, point_y, arrow)
-        print(matched)
         while True:
+            for x, y in matched:
+                self.puzzle[x][y] = 8
+            show_image(self.puzzle)
             changed = self.__update_puzzle(matched)
-            # if self.__is_dead():
-            #     self.puzzle = self.__random_init()
-            #     break
+            if not self.__is_not_dead():
+                print('dead')
+                self.puzzle = self.__random_init()
+                break
             matched = list()
             for x, y in changed:
                 matched += self.__match_blocks(x, y)
@@ -90,36 +93,56 @@ class Puzzle(object):
             changed.append((0, y))
         return list(set(changed))
 
+
+    def __transfor(self):
+        self.puzzle_transfor = list(map(list,zip(*self.puzzle)))
+
     # miss 4 method
-    def __is_dead(self):
+    def __is_not_dead(self):
+        # status like [口口]
+        if self.__block_status_1(self.puzzle):
+            return True
+        # status like [口X口]
+        if self.__block_status_2(self.puzzle):
+            return True
+
+        self.__transfor()
+
+        # status like [口口]
+        if self.__block_status_1(self.puzzle_transfor):
+            return True
+        # status like [口X口]
+        if self.__block_status_2(self.puzzle_transfor):
+            return True
+        return False
+
+    def __block_status_1(self, puzzle):
         for point_x in range(self.length):
-            for point_y in range(self.width):
-                if point_x-1 >= 0 and self.puzzle[point_x][point_y] == self.puzzle[point_x-1][point_y]:
-                    if self.__block_status_1(point_x, point_y):
+            for point_y in range(self.width-1):
+                if puzzle[point_x][point_y] == puzzle[point_x][point_y+1]:
+                    if point_x >= 1 and point_y >= 1 and puzzle[point_x-1][point_y-1] == puzzle[point_y][point_y]:
                         return True
-                elif point_y-1 >= 0 and self.puzzle[point_x][point_y] == self.puzzle[point_x][point_y-1]:
-                    if self.__block_status_2(point_x, point_y):
+                    if point_y >= 2 and puzzle[point_x][point_y-2] == puzzle[point_x][point_y]:
                         return True
-                elif point_x-2 >= 0 and self.puzzle[point_x][point_y] == self.puzzle[point_x-2][point_y]:
-                    if self.__block_status_3(point_x, point_y):
+                    if point_x+1 < self.length and point_y <= 1 and puzzle[point_x+1][point_y-1] == puzzle[point_x][point_y]:
                         return True
-                elif point_y-2 >= 0 and self.puzzle[point_x][point_y] == self.puzzle[point_x][point_y-2]:
-                    if self.__block_status_4(point_x, point_y):
+                    if point_x >= 1 and point_y+2 < self.width and puzzle[point_x-1][point_y+2] == puzzle[point_x][point_y]:
+                        return True
+                    if point_y+3 < self.width and puzzle[point_x][point_y+3] == puzzle[point_x][point_y]:
+                        return True
+                    if point_x+1 < self.length and point_y+3 < self.width and puzzle[point_x+1][point_y+3] == puzzle[point_x][point_y]:
                         return True
         return False
 
-
-    def __block_status_1(self, point_x, point_y):
-        pass
-
-    def __block_status_2(self, point_x, point_y):
-        pass
-
-    def __block_status_3(self, point_x, point_y):
-        pass
-
-    def __block_status_4(self, point_x, point_y):
-        pass
+    def __block_status_2(self, puzzle):
+        for point_x in range(self.length):
+            for point_y in range(1, self.width-1):
+                if puzzle[point_x][point_y-1] == puzzle[point_x][point_y+1]:
+                    if point_x >= 1 and puzzle[point_x-1][point_y] == puzzle[point_x][point_y-1]:
+                        return True
+                    if point_x+1 < self.length and puzzle[point_x+1][point_y] == puzzle[point_x][point_y-1]:
+                        return True
+        return False
                 
 
 def show_image(puzzle):
@@ -141,5 +164,4 @@ if __name__ == "__main__":
     show_image(p.puzzle)
 
 
-    # for x, y in matched:
-    #     puzzle[x][y] = 8
+
