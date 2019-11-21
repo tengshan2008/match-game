@@ -5,7 +5,7 @@ LENGTH = 9
 WIDTH = 9
 COLOR = 6
 
-class Puzzle(object):
+class MatchGame(object):
 
     def __init__(self, length=LENGTH, width=WIDTH, color=COLOR):
         self.length = length
@@ -19,11 +19,6 @@ class Puzzle(object):
     def move(self, point_x, point_y, arrow):
         matched = self.__match_puzzle(point_x, point_y, arrow)
         while True:
-            # for x, y in matched:
-            #     self.puzzle[x][y] = 8
-            # show_image(self.puzzle)
-            self.matched_history.append(matched)
-            self.puzzle_history.append(self.puzzle)
             changed = self.__update_puzzle(matched)
             if not self.__is_not_dead():
                 print('dead')
@@ -32,8 +27,12 @@ class Puzzle(object):
             matched = list()
             for x, y in changed:
                 matched += self.__match_blocks(x, y)
+            matched = list(set(matched))
             if len(matched) == 0:
                 break
+            else:
+                self.matched_history.append(matched)
+                self.puzzle_history.append(self.puzzle)
             
 
     def __random_init(self):
@@ -72,6 +71,9 @@ class Puzzle(object):
         matched = self.__match_blocks(x1, y1) + self.__match_blocks(x2, y2)
         if len(matched) == 0:
             self.puzzle[x1][y1], self.puzzle[x2][y2] = self.puzzle[x2][y2], self.puzzle[x1][y1]
+        else:
+            self.matched_history.append(matched)
+            self.puzzle_history.append(self.puzzle)
         return list(set(matched))
 
 
@@ -149,7 +151,6 @@ class Puzzle(object):
                     if point_x+1 < self.length and puzzle[point_x+1][point_y] == puzzle[point_x][point_y-1]:
                         return True
         return False
-                
 
 def show_image(puzzle):
     import matplotlib.pyplot as plt
@@ -158,17 +159,3 @@ def show_image(puzzle):
     plt.matshow(np.array(puzzle))
 
     plt.show()
-
-if __name__ == "__main__":
-    p = Puzzle()
-    show_image(p.puzzle)
-
-    x = input()
-    y = input()
-    arrow = input()
-    p.move(int(x), int(y), arrow)
-    show_image(p.puzzle)
-
-    print(p.matched_history)
-    print(p.puzzle_history)
-
