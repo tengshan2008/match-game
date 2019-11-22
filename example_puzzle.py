@@ -17,5 +17,10 @@ y = input()
 arrow = input()
 mg.move(int(x), int(y), arrow)
 
-for puzzle in mg.puzzle_history[1:]:
+for puzzle, matched in zip(mg.puzzle_history[1:], mg.matched_history):
+    pprint(matched)
+    for x, y in matched:
+        puzzle[x][y] = 8
     show_image(puzzle)
+
+show_image(mg.puzzle)

@@ -1,5 +1,5 @@
 import random
-from pprint import pprint
+import copy
 
 LENGTH = 9
 WIDTH = 9
@@ -12,13 +12,15 @@ class MatchGame(object):
         self.width = width
         self.color = color
         self.puzzle = self.__random_init()
-        self.matched_history = []
-        self.puzzle_history = [self.puzzle]
+        self.matched_history = list()
+        self.puzzle_history = [copy.deepcopy(self.puzzle)]
 
 
     def move(self, point_x, point_y, arrow):
         matched = self.__match_puzzle(point_x, point_y, arrow)
         while True:
+            self.matched_history.append(matched)
+            self.puzzle_history.append(copy.deepcopy(self.puzzle))
             changed = self.__update_puzzle(matched)
             if not self.__is_not_dead():
                 print('dead')
@@ -30,9 +32,6 @@ class MatchGame(object):
             matched = list(set(matched))
             if len(matched) == 0:
                 break
-            else:
-                self.matched_history.append(matched)
-                self.puzzle_history.append(self.puzzle)
             
 
     def __random_init(self):
@@ -71,9 +70,6 @@ class MatchGame(object):
         matched = self.__match_blocks(x1, y1) + self.__match_blocks(x2, y2)
         if len(matched) == 0:
             self.puzzle[x1][y1], self.puzzle[x2][y2] = self.puzzle[x2][y2], self.puzzle[x1][y1]
-        else:
-            self.matched_history.append(matched)
-            self.puzzle_history.append(self.puzzle)
         return list(set(matched))
 
 
@@ -102,16 +98,15 @@ class MatchGame(object):
         return list(set(changed))
 
 
-    def __transfor(self):
-        self.puzzle_transfor = list(map(list,zip(*self.puzzle)))
-
-    def __mirror(self):
+    def __puzzle_mirror(self):
         self.puzzle_mirror = [row[::-1] for row in self.puzzle]
 
+    def __puzzle_transfor(self):
+        self.puzzle_transfor = list(map(list,zip(*self.puzzle)))
 
     def __is_not_dead(self):
-        self.__transfor()
-        self.__mirror()
+        self.__puzzle_mirror()
+        self.__puzzle_transfor()
 
         # status like [口口]
         if self.__block_status_1(self.puzzle):
@@ -151,11 +146,3 @@ class MatchGame(object):
                     if point_x+1 < self.length and puzzle[point_x+1][point_y] == puzzle[point_x][point_y-1]:
                         return True
         return False
-
-def show_image(puzzle):
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    plt.matshow(np.array(puzzle))
-
-    plt.show()
