@@ -20,6 +20,8 @@ if __name__ == "__main__":
     mg = MatchGame(9, 9, 6)
     show_image(mg.puzzle)
 
-    mg.move(int(input()), int(input()), input())
+    arrow = {'u': mg.UP, 'd': mg.DOWN, 'l': mg.LEFT, 'r': mg.RIGHT}
+
+    mg.move(int(input()), int(input()), arrow[input()])
     show_detail(mg.puzzle_history, mg.matched_history)
     show_image(mg.puzzle)

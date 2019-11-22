@@ -7,6 +7,8 @@ COLOR = 6
 
 class MatchGame(object):
 
+    UP, DOWN, LEFT, RIGHT = 'up', 'down', 'left', 'right'
+
     def __init__(self, length=LENGTH, width=WIDTH, color=COLOR):
         self.length = length
         self.width = width
@@ -60,13 +62,13 @@ class MatchGame(object):
 
 
     def __match_puzzle(self, point_x, point_y, arrow):
-        if arrow == 'left':
+        if arrow == self.LEFT:
             x1, y1, x2, y2 = point_x, point_y, point_x, point_y-1
-        elif arrow == 'right':
+        elif arrow == self.RIGHT:
             x1, y1, x2, y2 = point_x, point_y, point_x, point_y+1
-        elif arrow == 'up':
+        elif arrow == self.UP:
             x1, y1, x2, y2 = point_x-1, point_y, point_x, point_y
-        elif arrow == 'down':
+        elif arrow == self.DOWN:
             x1, y1, x2, y2 = point_x+1, point_y, point_x, point_y
         
         self.puzzle[x1][y1], self.puzzle[x2][y2] = self.puzzle[x2][y2], self.puzzle[x1][y1]
