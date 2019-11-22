@@ -22,7 +22,7 @@ class MatchGame(object):
             self.matched_history.append(matched)
             self.puzzle_history.append(copy.deepcopy(self.puzzle))
             changed = self.__update_puzzle(matched)
-            if not self.__is_not_dead(self.puzzle):
+            if self.__is_dead(self.puzzle):
                 print('dead')
                 self.puzzle = self.__random_init()
                 break
@@ -39,7 +39,7 @@ class MatchGame(object):
         for point_x in range(self.width):
             for point_y in range(self.length):
                 puzzle = self.__fill_block(puzzle, point_x, point_y)
-        if not self.__is_not_dead(puzzle):
+        if self.__is_dead(puzzle):
             print('dead')
             puzzle = self.__random_init()
         return puzzle
@@ -101,24 +101,24 @@ class MatchGame(object):
         return list(set(changed))
 
 
-    def __is_not_dead(self, puzzle):
+    def __is_dead(self, puzzle):
         puzzle_mirror = [row[::-1] for row in puzzle]
         puzzle_transfor = list(map(list,zip(*puzzle)))
 
         # status like [口口]
         if self.__block_status_1(puzzle):
-            return True
+            return False
         if self.__block_status_1(puzzle_mirror):
-            return True
+            return False
         if self.__block_status_1(puzzle_transfor):
-            return True
+            return False
         # status like [口X口]
         if self.__block_status_2(puzzle):
-            return True
+            return False
         if self.__block_status_2(puzzle_transfor):
-            return True
+            return False
 
-        return False
+        return True
 
 
     def __block_status_1(self, puzzle):
