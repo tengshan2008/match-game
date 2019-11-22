@@ -13,7 +13,7 @@ class MatchGame(object):
         self.color = color
         self.puzzle = self.__random_init()
         self.matched_history = list()
-        self.puzzle_history = [copy.deepcopy(self.puzzle)]
+        self.puzzle_history = list()
 
 
     def move(self, point_x, point_y, arrow):
@@ -22,7 +22,7 @@ class MatchGame(object):
             self.matched_history.append(matched)
             self.puzzle_history.append(copy.deepcopy(self.puzzle))
             changed = self.__update_puzzle(matched)
-            if not self.__is_not_dead():
+            if not self.__is_not_dead(self.puzzle):
                 print('dead')
                 self.puzzle = self.__random_init()
                 break
@@ -39,6 +39,9 @@ class MatchGame(object):
         for point_x in range(self.width):
             for point_y in range(self.length):
                 puzzle = self.__fill_block(puzzle, point_x, point_y)
+        if not self.__is_not_dead(puzzle):
+            print('dead')
+            puzzle = self.__random_init()
         return puzzle
 
 
@@ -98,27 +101,21 @@ class MatchGame(object):
         return list(set(changed))
 
 
-    def __puzzle_mirror(self):
-        self.puzzle_mirror = [row[::-1] for row in self.puzzle]
-
-    def __puzzle_transfor(self):
-        self.puzzle_transfor = list(map(list,zip(*self.puzzle)))
-
-    def __is_not_dead(self):
-        self.__puzzle_mirror()
-        self.__puzzle_transfor()
+    def __is_not_dead(self, puzzle):
+        puzzle_mirror = [row[::-1] for row in puzzle]
+        puzzle_transfor = list(map(list,zip(*puzzle)))
 
         # status like [口口]
-        if self.__block_status_1(self.puzzle):
+        if self.__block_status_1(puzzle):
             return True
-        if self.__block_status_1(self.puzzle_mirror):
+        if self.__block_status_1(puzzle_mirror):
             return True
-        if self.__block_status_1(self.puzzle_transfor):
+        if self.__block_status_1(puzzle_transfor):
             return True
         # status like [口X口]
-        if self.__block_status_2(self.puzzle):
+        if self.__block_status_2(puzzle):
             return True
-        if self.__block_status_2(self.puzzle_transfor):
+        if self.__block_status_2(puzzle_transfor):
             return True
 
         return False
@@ -128,7 +125,7 @@ class MatchGame(object):
         for point_x in range(self.width):
             for point_y in range(self.length-1):
                 if puzzle[point_x][point_y] == puzzle[point_x][point_y+1]:
-                    if point_x >= 1 and point_y >= 1 and puzzle[point_x-1][point_y-1] == puzzle[point_y][point_y]:
+                    if point_x >= 1 and point_y >= 1 and puzzle[point_x-1][point_y-1] == puzzle[point_x][point_y]:
                         return True
                     if point_y >= 2 and puzzle[point_x][point_y-2] == puzzle[point_x][point_y]:
                         return True
